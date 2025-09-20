@@ -1,0 +1,11 @@
+{
+  "name": "my_weather_skill",
+  "description": "Hava durumu ve saat sorularını cevaplayan skill",
+  "author": "Kaan Lütfi Taşkın",
+  "version": "1.0.0",
+  "requirements": ["requests"],
+  "license": "Apache-2.0",
+  "url": "https://example.com/my_weather_skill"
+}
+
+

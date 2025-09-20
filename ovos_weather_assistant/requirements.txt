@@ -1,0 +1,5 @@
+requests
+ovos-workshop
+ovos-messagebus
+ovos-plugin-manager
+ovos-core
