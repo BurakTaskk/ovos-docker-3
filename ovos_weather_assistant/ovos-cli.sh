@@ -18,7 +18,7 @@ WAIT_TIME=3
 
 # Yardım fonksiyonu
 show_help() {
-    echo -e "${BLUE}🎤 OVOS CLI - Shell Script Versiyonu${NC}"
+    echo -e "${BLUE} OVOS CLI - Shell Script Versiyonu${NC}"
     echo "=================================="
     echo ""
     echo "Kullanım:"
@@ -55,7 +55,7 @@ while [[ $# -gt 0 ]]; do
             if [[ -z "$UTTERANCE" ]]; then
                 UTTERANCE="$1"
             else
-                echo -e "${RED}❌ Hata: Bilinmeyen parametre: $1${NC}"
+                echo -e "${RED} Hata: Bilinmeyen parametre: $1${NC}"
                 exit 1
             fi
             shift
@@ -65,19 +65,19 @@ done
 
 # Utterance kontrolü
 if [[ -z "$UTTERANCE" ]]; then
-    echo -e "${RED}❌ Hata: Komut belirtilmedi!${NC}"
+    echo -e "${RED} Hata: Komut belirtilmedi!${NC}"
     echo "Kullanım: $0 \"komut\""
     echo "Yardım için: $0 --help"
     exit 1
 fi
 
-echo -e "${BLUE}🎤 OVOS CLI - Shell Script${NC}"
+echo -e "${BLUE} OVOS CLI - Shell Script${NC}"
 echo "=============================="
 echo ""
 
 # Container'ın çalışıp çalışmadığını kontrol et
 if ! docker ps | grep -q "$CONTAINER_NAME"; then
-    echo -e "${RED}❌ Hata: '$CONTAINER_NAME' container'ı çalışmıyor!${NC}"
+    echo -e "${RED} Hata: '$CONTAINER_NAME' container'ı çalışmıyor!${NC}"
     echo "Container'ı başlatmak için:"
     echo "  docker start $CONTAINER_NAME"
     echo "Veya yeni container oluşturmak için:"
@@ -85,8 +85,8 @@ if ! docker ps | grep -q "$CONTAINER_NAME"; then
     exit 1
 fi
 
-echo -e "${GREEN}✅ Container '$CONTAINER_NAME' çalışıyor${NC}"
-echo -e "${YELLOW}📤 Komut gönderiliyor: '$UTTERANCE'${NC}"
+echo -e "${GREEN} Container '$CONTAINER_NAME' çalışıyor${NC}"
+echo -e "${YELLOW} Komut gönderiliyor: '$UTTERANCE'${NC}"
 
 # Python script ile MessageBus'a komut gönder (virtual environment kullan)
 docker exec -it "$CONTAINER_NAME" /app/ovos-core/.venv/bin/python -c "
@@ -129,7 +129,7 @@ bus = MessageBusClient()
 bus.run_in_thread()
 
 if not bus.connected_event.wait(5):
-    print('❌ Hata: MessageBus\\'a bağlanılamadı!')
+    print(' Hata: MessageBus\\'a bağlanılamadı!')
     exit(1)
 
 bus.on('message', on_message)
@@ -182,8 +182,8 @@ if not response_received.wait($WAIT_TIME):
 
 # Çıkış kodu kontrolü
 if [[ $? -eq 0 ]]; then
-    echo -e "${GREEN}🎉 İşlem tamamlandı!${NC}"
+    echo -e "${GREEN} İşlem tamamlandı!${NC}"
 else
-    echo -e "${RED}💥 İşlem başarısız!${NC}"
+    echo -e "${RED} İşlem başarısız!${NC}"
     exit 1
 fi
