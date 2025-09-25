@@ -70,7 +70,7 @@ docker build --no-cache -t ovos_weather .
 
 3. **Container'ı çalıştırın:**
 ```bash
-docker run -it -p 8181:8181 ovos_weather
+docker run -it -p 8181:8181 <docker-name>
 ```
 
 4. **2-3 dakika bekleyin** (OVOS'un başlaması için)
@@ -177,3 +177,4 @@ docker exec -it ovos-weather tail -f /var/log/ovos.log
 - [OVOS Community](https://github.com/OpenVoiceOS) - Açık kaynak sesli asistan
 
 - [OpenWeatherMap](https://openweathermap.org/) - Hava durumu API
+
