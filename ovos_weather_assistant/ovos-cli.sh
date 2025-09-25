@@ -96,19 +96,16 @@ import time
 import threading
 from ovos_bus_client import MessageBusClient, Message
 
-# Yanıt mesajlarını topla
 responses = []
 response_received = threading.Event()
 
 def on_message(message):
     global responses, response_received
     try:
-        # Mesaj tipini kontrol et
         if hasattr(message, 'msg_type'):
             msg_type = message.msg_type
             msg_data = getattr(message, 'data', {})
         else:
-            # String ise JSON parse et
             import json
             try:
                 msg_dict = json.loads(message)
@@ -117,48 +114,44 @@ def on_message(message):
             except:
                 msg_type = 'unknown'
                 msg_data = str(message)
-        
-        # Sadece speak mesajlarını yakala
         if msg_type == 'speak':
             utterance = msg_data.get('utterance', '')
             if utterance:
-                print(utterance)  # Sadece skill'in yanıtını yazdır
+                print(utterance)
                 response_received.set()
-    except Exception as e:
-        pass  # Hataları sessizce geç
+    except Exception:
+        pass
 
-# MessageBusClient başlat
 bus = MessageBusClient()
 bus.run_in_thread()
 
-# Bus'a bağlanmayı bekle
 if not bus.connected_event.wait(5):
-    print('❌ Hata: MessageBus\'a bağlanılamadı!')
+    print('❌ Hata: MessageBus\\'a bağlanılamadı!')
     exit(1)
 
-# Mesaj dinleyicisini başlat
 bus.on('message', on_message)
 
-# Skill'e doğrudan MessageBus event gönder
-if 'hava' in '$UTTERANCE'.lower():
-    # Utterance'dan şehir adını çıkar
-    city = 'İstanbul'  # Varsayılan şehir
-    if 'istanbul' in '$UTTERANCE'.lower():
-        city = 'İstanbul'
-    elif 'ankara' in '$UTTERANCE'.lower():
-        city = 'Ankara'
-    elif 'izmir' in '$UTTERANCE'.lower():
-        city = 'İzmir'
-    elif 'mersin' in '$UTTERANCE'.lower():
-        city = 'Mersin'
-    
-    weather_message = Message('my_weather_skill:get_weather', {'city': city})
+# 81 il listesi (küçük harf)
+cities = [
+    'adana','adiyaman','afyonkarahisar','ağrı','amasya','ankara','antalya','artvin','aydın','balıkesir','bilecik','bingöl','bitlis','bolu','burdur','bursa','çanakkale','çankırı','çorum','denizli','diyarbakır','edirne','elazığ','erzincan','erzurum','eskişehir','gaziantep','giresun','gümüşhane','hakkari','hatay','ısparta','mersin','istanbul','izmir','kars','kastamonu','kayseri','kırklareli','kırşehir','kocaeli','konya','kütahya','malatya','manisa','kahramanmaraş','mardin','muğla','muş','nevşehir','niğde','ordu','rize','sakarya','samsun','siirt','sinop','sivas','tekirdağ','tokat','trabzon','tunceli','şanlıurfa','uşak','van','yozgat','zonguldak','aksaray','bayburt','karaman','kırıkkale','batman','şırnak','bartın','ardahan','ığdır','yalova','karabük','kilis','osmaniye','düzce'
+]
+
+utterance = '$UTTERANCE'.lower()
+
+if 'hava' in utterance:
+    city_found = None
+    for city in cities:
+        if city in utterance:
+            city_found = city.capitalize()
+            break
+    if not city_found:
+        city_found = 'İstanbul'  # varsayılan şehir
+    weather_message = Message('my_weather_skill:get_weather', {'city': city_found})
     bus.emit(weather_message)
-elif 'saat' in '$UTTERANCE'.lower():
+elif 'saat' in utterance:
     time_message = Message('my_weather_skill:get_time', {})
     bus.emit(time_message)
 
-# Skill'in yanıt vermesi için bekle
 if not response_received.wait($WAIT_TIME):
     print('Yanıt alınamadı')
 "
