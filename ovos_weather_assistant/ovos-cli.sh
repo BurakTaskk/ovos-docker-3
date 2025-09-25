@@ -94,6 +94,11 @@ echo -e "${YELLOW}📤 Komut gönderiliyor: '$UTTERANCE'${NC}"
 docker exec -it "$CONTAINER_NAME" /app/ovos-core/.venv/bin/python -c "
 import time
 import threading
+from datetime import datetime
+try:
+    from zoneinfo import ZoneInfo
+except Exception:
+    ZoneInfo = None
 from ovos_bus_client import MessageBusClient, Message
 
 responses = []
@@ -115,9 +120,9 @@ def on_message(message):
                 msg_type = 'unknown'
                 msg_data = str(message)
         if msg_type == 'speak':
-            utterance = msg_data.get('utterance', '')
-            if utterance:
-                print(utterance)
+            utter = msg_data.get('utterance', '')
+            if utter:
+                print(utter)
                 response_received.set()
     except Exception:
         pass
@@ -142,15 +147,36 @@ if 'hava' in utterance:
     city_found = None
     for city in cities:
         if city in utterance:
+            # İlk bulunan il ile devam et
             city_found = city.capitalize()
             break
     if not city_found:
         city_found = 'İstanbul'  # varsayılan şehir
     weather_message = Message('my_weather_skill:get_weather', {'city': city_found})
     bus.emit(weather_message)
-elif 'saat' in utterance:
-    time_message = Message('my_weather_skill:get_time', {})
-    bus.emit(time_message)
+
+# SAAT ile ilgili istekleri yerelde, doğru timezone ile hesapla ve anında cevap ver
+elif 'saat' in utterance or 'kaç' in utterance:
+    try:
+        # Tercihen zoneinfo kullan (Python 3.9+)
+        if ZoneInfo is not None:
+            tz = ZoneInfo('Europe/Istanbul')
+            now = datetime.now(tz)
+        else:
+            # Fallback: Turkey UTC+3 (Türkiye 2016'dan beri +3 sabit)
+            now = datetime.utcfromtimestamp(time.time() + 3*3600)
+        time_str = now.strftime('%H:%M')
+        print(f'Şu an saat {time_str}')
+        # skill'den gelen speak mesajını bekleyen ana loop'u uyandırmak için event'i tetikle
+        response_received.set()
+    except Exception:
+        # En son çare olarak sistem zamanını kullan
+        try:
+            time_str = time.strftime('%H:%M', time.localtime())
+            print(f'Şu an saat {time_str}')
+            response_received.set()
+        except Exception:
+            pass
 
 if not response_received.wait($WAIT_TIME):
     print('Yanıt alınamadı')
